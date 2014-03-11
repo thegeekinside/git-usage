@@ -6,7 +6,7 @@ require 'git'
 desc "Etiqueta el release"
 task :TagRelease, [:fullVersion,:isRelease] do |t, args|
 	isRelease = (args[:isRelease] || "true").to_b
-	
+
 	CalculateVersionByInstance(args[:fullVersion], "medtzin") do |major, minor, build, bugfix|
 		revision = isRelease ? 0 : bugfix
 		release = "release-#{major}.#{minor.to_i}.#{build}.#{isRelease ? 0 : bugfix}"
@@ -19,16 +19,16 @@ def HazAlgoConEsteRelease(release)
 	g.log.each do |c|
 		p c.message
 	end
-	
+
 	g.add_tag(release)
-	g.push("origin")
-	
+	g.push(g.remote("master"))
+
 	puts "El número de release es: #{release}"
 end
 
 #-- Legacy
-$APP_VERSION_PRODUCTO_MAYOR              = '5'    
-$APP_VERSION_PRODUCTO_MENOR              = '0105' 
+$APP_VERSION_PRODUCTO_MAYOR              = '5'
+$APP_VERSION_PRODUCTO_MENOR              = '0105'
 
 $INSTANCIAS = {
 	:medtzin => 1,
@@ -46,7 +46,7 @@ def CalculateVersionByInstance(version, instancia)
 		instance = sprintf '%02d', $INSTANCIAS[instancia]
 		minor = "#{instance}#{minor_instance}"
 
-		yield major, minor, build, bugfix    
+		yield major, minor, build, bugfix
 end
 
 def ValidateInstance(instance)
@@ -66,5 +66,5 @@ class String
 		else
 			return false
 		end
-	end	
+	end
 end
