@@ -16,7 +16,13 @@ end
 
 def HazAlgoConEsteRelease(release)
 	g = Git.open(".")
-	p g.repo
+	g.log.each do |c|
+		p c.message
+	end
+	
+	g.add_tag(release)
+	g.push("origin")
+	
 	puts "El número de release es: #{release}"
 end
 
