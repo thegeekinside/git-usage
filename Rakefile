@@ -1,6 +1,9 @@
 # encoding: UTF-8
 
 require 'git'
+$workspaces_base = '/Users/thegeekinside/Source/ruby/spikes/'
+$workspace       = 'git-usage'
+$workspace_path = File.join($workspaces_base, $workspace)
 
 
 desc "Etiqueta el release"
@@ -10,12 +13,12 @@ task :TagRelease, [:fullVersion,:isRelease] do |t, args|
 	CalculateVersionByInstance(args[:fullVersion], "medtzin") do |major, minor, build, bugfix|
 		revision = isRelease ? 0 : bugfix
 		release = "release-#{major}.#{minor.to_i}.#{build}.#{isRelease ? 0 : bugfix}"
-		HazAlgoConEsteRelease(release)
+		tag_release(release)
 	end
 end
 
 def HazAlgoConEsteRelease(release)
-	g = Git.open(".")
+	g = Git.open($workspace_path)
 	g.log.each do |c|
 		p c.message
 	end
@@ -26,10 +29,16 @@ def HazAlgoConEsteRelease(release)
 
 	g.add_tag(release)
 	g.repack
-	#g.push(g.remote("origin"))
-	g.push
-
+	g.push(g.remote("origin"), release)
 	puts "El número de release es: #{release}"
+end
+
+def tag_release(release)
+	g = Git.open($workspace_path)
+
+	g.add_tag(release)
+	g.repack
+	g.push(g.remote("origin"), release)
 end
 
 #-- Legacy
