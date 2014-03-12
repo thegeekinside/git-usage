@@ -20,8 +20,14 @@ def HazAlgoConEsteRelease(release)
 		p c.message
 	end
 
+	g.remotes.each do |r|
+		p r.name
+	end
+
 	g.add_tag(release)
-	g.push(g.remote("master"))
+	g.repack
+	#g.push(g.remote("origin"))
+	g.push
 
 	puts "El número de release es: #{release}"
 end
