@@ -1,13 +1,13 @@
 # encoding: UTF-8
 
-require 'git'
 $workspaces_base = '/Users/thegeekinside/Source/ruby/spikes/'
 $workspace       = 'git-usage'
 $workspace_path = File.join($workspaces_base, $workspace)
 
+require 'git'
 
 desc "Etiqueta el release"
-task :TagRelease, [:fullVersion,:isRelease] do |t, args|
+task :CreateReleaseShare, [:fullVersion,:isRelease] do |t, args|
 	isRelease = (args[:isRelease] || "true").to_b
 
 	CalculateVersionByInstance(args[:fullVersion], "medtzin") do |major, minor, build, bugfix|
@@ -17,35 +17,23 @@ task :TagRelease, [:fullVersion,:isRelease] do |t, args|
 	end
 end
 
-def HazAlgoConEsteRelease(release)
-	g = Git.open($workspace_path)
-	g.log.each do |c|
-		p c.message
-	end
-
-	g.remotes.each do |r|
-		p r.name
-	end
-
-	g.add_tag(release)
-	g.repack
-	g.push(g.remote("origin"), release)
-	puts "El número de release es: #{release}"
-end
 
 # Se agrega este comentario para prueba
 def tag_release(release)
 	g = Git.open($workspace_path)
 
-	g.add_tag(release)
-	g.repack
-	g.push(g.remote("origin"), release)
+	if g.tags.select{|t| t.name == release}.size > 0
+		puts "La etiqueta ya existe, se borrará"
+		g.lib.tag(release,{:d => true})
+		g.add_tag("#{release}-reemplazada")
+		g.push(g.remote("origin"), "#{release}-reemplazada")	
+	else 
+		g.add_tag(release)
+		g.push(g.remote("origin"), release)	
+	end
 end
 
 #-- Legacy
-$APP_VERSION_PRODUCTO_MAYOR              = '5'
-$APP_VERSION_PRODUCTO_MENOR              = '0105'
-
 $INSTANCIAS = {
 	:medtzin => 1,
 	:ssh     => 2,
@@ -83,4 +71,23 @@ class String
 			return false
 		end
 	end
+end
+
+#-- Some spikes
+def HazAlgoConEsteRelease(release)
+	g = Git.open($workspace_path)
+	g.log.each do |c|
+		p c.message
+	end
+
+	g.remotes.each do |r|
+		p r.name
+	end
+
+	if !g.tags.include? release
+		g.add_tag(release)
+		g.repack
+		g.push(g.remote("origin"), release)	
+	end
+	puts "El número de release es: #{release}"
 end
